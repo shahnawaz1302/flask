@@ -2,6 +2,7 @@
 
 from flask import *
 from flask_sqlalchemy import *
+import pickle
 # intially i fetched all attributes og database into students which is in line 27 but i got error due to i did't created any datbase so 
 # i created a datbase in line 53
 app=Flask(__name__)
