@@ -1,0 +1,32 @@
+<html>
+    <body>
+        <!--Intially what i did is i wrote href as url_for('show_all )' where '' are not support to be thre on url_for-->
+        <h3><a href="{{url_for('show_all')}}">Student- Flask Alchemy</a></h3>
+        {% for category, message in get_flashed_messages(with_categories=true) %}
+            <div class="alert alert-danger">
+                {{ message }}
+            </div>
+        {% endfor %}
+        <h3><a href="{{url_for('new')}}"> Add new Student</a></h3>
+        <!-- this will create table ofor our datbase and i thred will create headings in database-->
+        <table border='1'>
+            <thead>
+                <td><h3>Name</h3></td>
+                <td><h3>email</h3></td>
+                <td><h3>address</h3></td>
+                <td><h3>pincode</h3></td>
+            </thead>
+            <tbody>
+                <!-- will help in inserting the values in datbase because we deployed the values in user -->
+                {% for user in students %}
+                    <tr>
+                        <td><h3>{{user['name']}}</h3></td>
+                        <td><h3>{{user['email']}}</h3></td>
+                        <td><h3>{{user['address']}}</h3></td>
+                        <td><h3>{{user['pincode'] }}</h3></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </body>
+</html>

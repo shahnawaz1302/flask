@@ -1,0 +1,23 @@
+<html>
+    <body>
+        <h3>Students-Flask Alchemy</h3>
+        <!-- helps in flashing the message-->
+        {%- for message in get_flashed_messages() %}
+            
+                {{ message }}
+            
+        {%- endfor %}
+        <form action="{{request.path}}" method="POST">
+            <!-- this will create blocks of places to enter the credentials-->
+            <label for="name">name</label><br>
+            <input type="text" name="name" placeholder="name" /><br> <!-- '/' is madetory thing-->
+            <label for="email">email</label><br>
+            <input type="text" name="email" placeholder="email"/><br>
+            <label for="address">address</label><br>
+            <input type="text" name="address" placeholder="address"/><br>
+            <label for="pincode">pincode</label><br>
+            <input type="text" name="pincode" placeholder="pincode"/><br>
+            <input type="submit" value="Submit">
+        </form>
+    </body>
+</html>

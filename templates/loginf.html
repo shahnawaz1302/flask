@@ -1,0 +1,16 @@
+<html>
+    <body>
+        {% if error %}
+        <p><strong>Error:</strong> {{ error }}</p><!-- if error is not none it will print thr error-->
+        {% endif %}
+
+        <form action="" method="post">
+            <h1>
+                Enter the credentials:
+            </h1>
+            <p><input type="text" name="username" value="{{request.form.username}}"></p>
+            <p><input type="password" name="password"></p>
+            <p><input type="submit" value="login"></p>
+        </form>
+    </body>
+</html>

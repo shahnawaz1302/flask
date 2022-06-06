@@ -1,0 +1,66 @@
+<html>
+    <body>
+        {% with messages = get_flashed_messages () %}  <!-- activating flash message -->
+            {% if messages %} <!--checking for message -->
+            <ul>
+                {% for message in messages %}
+                <li>
+                    {{message}}
+                </li>
+                {% endfor%}
+            </ul>
+            {% endif %}
+        {% endwith %}
+        {% for message in form.name.errors %} <!--any error in form grt stored here and provide message-->
+            <div>
+                {{message}}
+            </div>
+        {% endfor%} 
+        {% for message in form.Email.errors %}
+            <div>
+                {{message}}
+            </div>
+        {% endfor%} 
+        <form action="http://localhost:5000/" method= 'POST'>
+
+            <fieldset>
+                <legend style="text-align: center;font-weight:bold;font-size:30px;" >Contact form</legend>
+                <!--above line give contact box where all crendentials inputs can be taken-->
+                
+                <div style= font-size:20px;font-weight:bold;margin-left:150px ;>
+                <!--above line define name and email in bold letters and also give bxes before it-->>
+                    {{form.name.label}}
+                    <br>
+                    {{form.name}}
+                    </br>
+                    {{form.Email.label}}
+                    <br>
+                    {{form.Email}}
+                    </br>
+                    <br>
+                    {{form.Gender.label}}
+                    {{form.Gender}}
+                    </br>
+                    {{form.address.label}}
+                    <br>
+                    {{form.address}}
+                    </br>
+                    {{form.age.label}}
+                    <br>
+                    {{form.age}}
+                    </br>
+                    {{form.language.label}}
+                    <br>
+                    {{form.language}}
+                    </br>
+                    
+                    <br>
+                    
+                    {{form.submit}}
+                    </br>
+                </div>
+            </fieldset>
+        </form>
+    </body>
+</html>
+

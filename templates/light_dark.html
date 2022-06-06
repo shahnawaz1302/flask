@@ -1,0 +1,20 @@
+<html lang="en">
+    <head>
+        {% if session['mode']=='light' %}
+        <style>
+            body{
+                background-color:white;
+                color: black;
+            }
+        </style>
+        {% endif %}
+    </head>
+    <body> 
+        <div style="text-align: center;">
+            <h1>MY SITE</h1>
+            <a href="{{ url_for('background',mode='light')}}">Light Mode</a><!--we are going to reditect to background
+                method and there we are going to set mode to session mode   -->
+            <a href="{{ url_for('background',mode='dark')}}">Dark Mode</a>
+        </div>
+    </body>
+</html>
