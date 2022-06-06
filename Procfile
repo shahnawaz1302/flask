@@ -1,1 +1,1 @@
-web: gunicorn app:alchemy
+web: gunicorn app:app
