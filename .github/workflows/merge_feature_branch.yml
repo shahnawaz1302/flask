@@ -1,0 +1,27 @@
+name: Merge Feature Branch
+
+on:
+  workflow_dispatch:
+    inputs:
+      feature_branch:
+        description: 'Feature branch to merge'
+        required: true
+      target_branch:
+        description: 'Target branch to merge into (qa1, qa2, qa3)'
+        required: true
+        default: 'qa1'
+
+jobs:
+  merge_branch:
+    name: Merge Feature Branch into Selected Branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+        with:
+          ref: '${{ github.event.inputs.feature_branch }}'
+      - name: Force Push to Target Branch
+        run: |
+          git config user.email "action@github.com"
+          git config user.name "GitHub Actions"
+          git push --force origin HEAD:${{ github.event.inputs.target_branch }}

@@ -1,0 +1,51 @@
+name: Run Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      ikhub_username:
+        description: 'IKHUB Username'
+        required: true
+      ikhub_password:
+        description: 'IKHUB Password'
+        required: true
+      ikhub_url:
+        description: 'IKHUB URL'
+        required: true
+
+jobs:
+  run_fe_tests:
+    name: Run Frontend Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout current repo
+        uses: actions/checkout@v4
+        with:
+          path: 'main-repo'
+      - name: Checkout test repo
+        uses: actions/checkout@v4
+        with:
+          repository: 'khub-app/khub-web-tests'
+          ref: 'master'
+          path: 'test-repo'
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      - name: Create and Activate Virtual Environment
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+      - name: Install pytest and pytest-xdist
+        run: |
+          source venv/bin/activate
+          pip install pytest pytest-xdist
+      - name: Run pytest
+        env:
+          IKHUB_LINK: ${{ github.event.inputs.ikhub_url }}
+          IKHUB_USERNAME: ${{ github.event.inputs.ikhub_username }}
+          IKHUB_PASSWORD: ${{ github.event.inputs.ikhub_password }}
+        run: |
+          source venv/bin/activate
+          cd test-repo
+          pytest -n 8 --dist=loadscope --link "${IKHUB_LINK}" --username "${IKHUB_USERNAME}" --password "${IKHUB_PASSWORD}"
