@@ -1,0 +1,30 @@
+name: Fetch Branches
+
+on:
+  workflow_dispatch:
+jobs:
+  fetch_branches:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Fetch Branches
+        id: fetch_branches
+        run: |
+          BRANCHES=$(git branch -r | grep -v '\->' | sed 's|  origin/||' | tr '\n' ' ')
+          echo "branches=$BRANCHES" >> $GITHUB_ENV
+
+      - name: Create Dispatch Payload
+        id: create_payload
+        run: |
+          BRANCHES_JSON=$(echo ${{ env.branches }} | jq -R -s -c 'split(" ")')
+          echo "payload={\"branches\": $BRANCHES_JSON}" >> $GITHUB_ENV
+
+      - name: Trigger Repository Dispatch
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          event-type: branches-list
+          client-payload: ${{ env.payload }}
