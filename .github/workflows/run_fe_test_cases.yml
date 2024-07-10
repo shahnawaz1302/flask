@@ -1,7 +1,6 @@
 name: Run Tests
 
 on:
-  workflow_dispatch:
     inputs:
       ikhub_username:
         description: 'IKHUB Username'
