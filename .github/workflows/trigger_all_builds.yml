@@ -1,0 +1,48 @@
+name: Trigger all Workflows
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to build'
+        required: true
+        default: 'dev'
+        type: string
+
+jobs:
+  trigger-builds:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set Branch Variable
+        id: set-branch
+        run: echo "BRANCH=${{ github.event.inputs.branch }}" >> $GITHUB_ENV
+
+      - name: Call Build Workflows
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const branch = process.env.BRANCH;
+            const workflows = [
+              'build_backend.yml',
+              'build_client_admin.yml',
+              'build_client_ecom.yml',
+              'build_client_tenant.yml',
+              'build_ecom.yml'
+            ];
+
+            async function triggerWorkflow(workflow) {
+              try {
+                await github.actions.createWorkflowDispatch({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  workflow_id: workflow,
+                  ref: branch
+                });
+                console.log(`Successfully triggered ${workflow}`);
+              } catch (error) {
+                console.error(`Failed to trigger ${workflow}: ${error.message}`);
+              }
+            }
+
+            const promises = workflows.map(workflow => triggerWorkflow(workflow));
+            await Promise.all(promises);
