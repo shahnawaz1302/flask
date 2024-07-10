@@ -2,12 +2,6 @@ name: Trigger all Workflows
 
 on:
   workflow_dispatch:
-    inputs:
-      branch:
-        description: 'Branch to build'
-        required: true
-        default: 'dev'
-        type: string
 
 jobs:
   trigger-builds:
@@ -15,7 +9,7 @@ jobs:
     steps:
       - name: Set Branch Variable
         id: set-branch
-        run: echo "BRANCH=${{ github.event.inputs.branch }}" >> $GITHUB_ENV
+        run: echo "BRANCH=${{ github.ref_name }}" >> $GITHUB_ENV
 
       - name: Call Build Workflows
         uses: actions/github-script@v6
