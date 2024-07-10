@@ -3,15 +3,6 @@ name: Merge Feature Branch
 on:
   workflow_dispatch:
     inputs:
-      feature_branch:
-        description: 'Feature branch to merge'
-        required: true
-        type: choice
-        options:
-          - main
-          - test1
-          - test2
-          # Add more branches as needed
       target_branch:
         description: 'Target branch to merge into'
         required: true
@@ -24,22 +15,13 @@ on:
 
 jobs:
   merge_branch:
+    name: Merge Feature Branch into Selected Branch
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
-
-      - name: Fetch Branches
-        run: |
-          BRANCHES=$(git ls-remote --heads origin | awk '{print $2}' | sed 's|refs/heads/||')
-          echo "Available branches to merge:"
-          echo $BRANCHES
-
-      - name: Checkout Feature Branch
-        uses: actions/checkout@v2
         with:
-          ref: '${{ github.event.inputs.feature_branch }}'
-
+          ref: '${{ github.ref_name }}'
       - name: Force Push to Target Branch
         run: |
           git config user.email "action@github.com"
