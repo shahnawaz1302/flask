@@ -6,6 +6,12 @@ on:
       feature_branch:
         description: 'Feature branch to merge'
         required: true
+        type: choice
+        options:
+          - main
+          - test1
+          - test2
+          # Add more branches as needed
       target_branch:
         description: 'Target branch to merge into'
         required: true
@@ -17,37 +23,24 @@ on:
           - qa3
 
 jobs:
-  fetch_and_merge_branches:
+  merge_branch:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
       - name: Fetch Branches
-        id: fetch_branches
         run: |
-          BRANCHES=$(git branch -r | grep -v '\->' | sed 's|  origin/||' | tr '\n' ' ')
-          echo "branches=$BRANCHES" >> $GITHUB_ENV
+          BRANCHES=$(git ls-remote --heads origin | awk '{print $2}' | sed 's|refs/heads/||')
+          echo "Available branches to merge:"
           echo $BRANCHES
 
-      - name: Manual Branch Selection
-        if: ${{ github.event_name == 'workflow_dispatch' }}
-        run: |
-          echo "Select a branch to merge:"
-          echo "${{ env.branches }}"
-          # In a real-world scenario, you might want to handle branch selection differently
-          # because GitHub Actions doesn't support interactive inputs directly.
-          # Example: Store branches in a file and let the user pick from that file.
-          # Here, we assume the user will manually input the branch name in the UI.
-
       - name: Checkout Feature Branch
-        if: ${{ github.event.inputs.feature_branch }}
         uses: actions/checkout@v2
         with:
           ref: '${{ github.event.inputs.feature_branch }}'
 
       - name: Force Push to Target Branch
-        if: ${{ github.event.inputs.feature_branch && github.event.inputs.target_branch }}
         run: |
           git config user.email "action@github.com"
           git config user.name "GitHub Actions"
