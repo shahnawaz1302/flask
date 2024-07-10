@@ -1,9 +1,23 @@
-name: Fetch Branches
+name: Merge Feature Branch
 
 on:
   workflow_dispatch:
+    inputs:
+      feature_branch:
+        description: 'Feature branch to merge'
+        required: true
+      target_branch:
+        description: 'Target branch to merge into'
+        required: true
+        default: 'qa1'
+        type: choice
+        options:
+          - qa1
+          - qa2
+          - qa3
+
 jobs:
-  fetch_branches:
+  fetch_and_merge_branches:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -14,17 +28,27 @@ jobs:
         run: |
           BRANCHES=$(git branch -r | grep -v '\->' | sed 's|  origin/||' | tr '\n' ' ')
           echo "branches=$BRANCHES" >> $GITHUB_ENV
+          echo $BRANCHES
 
-      - name: Create Dispatch Payload
-        id: create_payload
+      - name: Manual Branch Selection
+        if: ${{ github.event_name == 'workflow_dispatch' }}
         run: |
-          BRANCHES_JSON=$(echo ${{ env.branches }} | jq -R -s -c 'split(" ")')
-          echo "payload={\"branches\": $BRANCHES_JSON}" >> $GITHUB_ENV
+          echo "Select a branch to merge:"
+          echo "${{ env.branches }}"
+          # In a real-world scenario, you might want to handle branch selection differently
+          # because GitHub Actions doesn't support interactive inputs directly.
+          # Example: Store branches in a file and let the user pick from that file.
+          # Here, we assume the user will manually input the branch name in the UI.
 
-      - name: Trigger Repository Dispatch
-        uses: peter-evans/repository-dispatch@v2
+      - name: Checkout Feature Branch
+        if: ${{ github.event.inputs.feature_branch }}
+        uses: actions/checkout@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          repository: ${{ github.repository }}
-          event-type: branches-list
-          client-payload: ${{ env.payload }}
+          ref: '${{ github.event.inputs.feature_branch }}'
+
+      - name: Force Push to Target Branch
+        if: ${{ github.event.inputs.feature_branch && github.event.inputs.target_branch }}
+        run: |
+          git config user.email "action@github.com"
+          git config user.name "GitHub Actions"
+          git push --force origin HEAD:${{ github.event.inputs.target_branch }}
