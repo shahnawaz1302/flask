@@ -13,12 +13,10 @@ jobs:
 
       - name: Call Build Workflows
         uses: actions/github-script@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           script: |
-            const { getOctokit, context: githubContext } = require('@actions/github');
-            const token = process.env.GITHUB_TOKEN;
-            const octokit = getOctokit(token);
-            const branch = process.env.BRANCH;
             const workflows = [
               'build_backend.yml',
               'build_client_admin.yml',
@@ -26,17 +24,22 @@ jobs:
             ];
 
             async function triggerWorkflow(workflow) {
-              try {
-                await octokit.actions.createWorkflowDispatch({
-                  owner: githubContext.repo.owner,
-                  repo: githubContext.repo.repo,
-                  workflow_id: workflow,
-                  ref: branch
-                });
+              const url = `https://api.github.com/repos/${context.repo.owner}/${context.repo.repo}/actions/workflows/${workflow}/dispatches`;
+              const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${process.env.GITHUB_TOKEN}`,
+                  'Accept': 'application/vnd.github.v3+json'
+                },
+                body: JSON.stringify({ ref: process.env.BRANCH })
+              });
+
+              if (!response.ok) {
+                const message = `Failed to trigger ${workflow}: ${response.statusText}`;
+                console.error(message);
+                throw new Error(message);
+              } else {
                 console.log(`Successfully triggered ${workflow}`);
-              } catch (error) {
-                console.error(`Failed to trigger ${workflow}: ${error.message}`);
-                throw error; // Throw error to stop the workflow
               }
             }
 
@@ -47,5 +50,3 @@ jobs:
               console.error('One or more workflows failed to trigger.');
               process.exit(1); // Exit with a failure code
             }
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
