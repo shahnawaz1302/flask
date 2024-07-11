@@ -15,9 +15,9 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const github = require('@actions/github');
+            const { getOctokit, context } = require('@actions/github');
             const token = process.env.GITHUB_TOKEN;
-            const octokit = github.getOctokit(token);
+            const octokit = getOctokit(token);
             const branch = process.env.BRANCH;
             const workflows = [
               'build_backend.yml',
@@ -28,8 +28,8 @@ jobs:
             async function triggerWorkflow(workflow) {
               try {
                 await octokit.actions.createWorkflowDispatch({
-                  owner: github.context.repo.owner,
-                  repo: github.context.repo.repo,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
                   workflow_id: workflow,
                   ref: branch
                 });
