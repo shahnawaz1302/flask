@@ -17,7 +17,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           script: |
-            const fetch = require('node-fetch');
             const workflows = [
               'build_backend.yml',
               'build_client_admin.yml'
