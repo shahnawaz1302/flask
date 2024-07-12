@@ -2,12 +2,6 @@ name: Trigger all Workflows
 
 on:
   workflow_dispatch:
-    inputs:
-      branch:
-        description: 'Branch to build'
-        required: true
-        default: 'dev'
-        type: string
 
 jobs:
   trigger-builds:
@@ -15,34 +9,43 @@ jobs:
     steps:
       - name: Set Branch Variable
         id: set-branch
-        run: echo "BRANCH=${{ github.event.inputs.branch }}" >> $GITHUB_ENV
+        run: echo "BRANCH=${{ github.ref_name }}" >> $GITHUB_ENV
 
       - name: Call Build Workflows
         uses: actions/github-script@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           script: |
-            const branch = process.env.BRANCH;
             const workflows = [
               'build_backend.yml',
-              'build_client_admin.yml',
-              'build_client_ecom.yml',
-              'build_client_tenant.yml',
-              'build_ecom.yml'
+              'build_client_admin.yml'
             ];
 
             async function triggerWorkflow(workflow) {
-              try {
-                await github.actions.createWorkflowDispatch({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  workflow_id: workflow,
-                  ref: branch
-                });
+              const url = `https://api.github.com/repos/${context.repo.owner}/${context.repo.repo}/actions/workflows/${workflow}/dispatches`;
+              const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${process.env.GITHUB_TOKEN}`,
+                  'Accept': 'application/vnd.github.v3+json'
+                },
+                body: JSON.stringify({ ref: process.env.BRANCH })
+              });
+
+              if (!response.ok) {
+                const message = `Failed to trigger ${workflow}: ${response.statusText}`;
+                console.error(message);
+                throw new Error(message);
+              } else {
                 console.log(`Successfully triggered ${workflow}`);
-              } catch (error) {
-                console.error(`Failed to trigger ${workflow}: ${error.message}`);
               }
             }
 
-            const promises = workflows.map(workflow => triggerWorkflow(workflow));
-            await Promise.all(promises);
+            try {
+              const promises = workflows.map(workflow => triggerWorkflow(workflow));
+              await Promise.all(promises);
+            } catch (error) {
+              console.error('One or more workflows failed to trigger.');
+              process.exit(1); // Exit with a failure code
+            }
